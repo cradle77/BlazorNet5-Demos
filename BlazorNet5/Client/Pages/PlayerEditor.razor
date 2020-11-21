@@ -1,0 +1,109 @@
+﻿@page "/players/{Id}"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using Azure.Storage.Blobs
+@using System.IO
+
+<div class="col-6">
+    <EditForm Model="_player" OnValidSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row">
+            <div class="col-8">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <InputText id="name" class="form-control" @bind-Value="@_player.Name" />
+                </div>
+                <div class="form-group">
+                    <label for="number">Number</label>
+                    <InputNumber id="number" class="form-control" @bind-Value="@_player.Number" />
+                </div>
+                <InputRadioGroup Name="role" @bind-Value="_player.Role">
+                    @foreach (var role in Enum.GetValues<Role>())
+                    {
+                        <div class="form-check">
+                            <InputRadio Name="role" id="@(Enum.GetName<Role>(role))" Value="role" />
+                            <label class="form-check-label" for="@(Enum.GetName<Role>(role))">
+                                @(Enum.GetName<Role>(role))
+                            </label>
+                        </div>
+                    }
+                </InputRadioGroup>
+                <div class="form-group">
+                    <label for="expiryDate">Expiry date</label>
+                    <InputDate id="expiryDate" class="form-control" @bind-Value="@_player.ExpiryDate" DisplayName="Expiry date" />
+                </div>
+            </div>
+            <div class="col-4">
+                <PlayerPhoto Player="_player" />
+
+                <InputFile OnChange="UploadAsync"></InputFile>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private Player _player { get; set; }
+
+    private EditContext editContext;
+
+    private bool _isNew;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _player = new Player() { ExpiryDate = DateTime.Today.AddYears(1) };
+
+        _isNew = !int.TryParse(this.Id, out var id);
+
+        if (!_isNew)
+        {
+            _player = await this.Http.GetFromJsonAsync<Player>($"/api/players/{id}");
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        HttpResponseMessage response;
+
+        if (_isNew)
+        {
+            response = await this.Http.PostAsJsonAsync("/api/players", _player);
+        }
+        else
+        {
+            response = await this.Http.PutAsJsonAsync($"/api/players/{this.Id}", _player);
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        this.Navigation.NavigateTo("/players");
+    }
+
+    private async Task UploadAsync(InputFileChangeEventArgs e)
+    {
+        var extension = Path.GetExtension(e.File.Name);
+
+        string fileName = Path.ChangeExtension($"players_{Guid.NewGuid()}", extension);
+
+        var response = await this.Http.PostAsJsonAsync("/api/photos", new FileUploadRequest() { FileName = fileName });
+
+        response.EnsureSuccessStatusCode();
+
+        var uri = await response.Content.ReadAsStringAsync();
+
+        var blob = new BlobClient(new Uri(uri));
+
+        await blob.DeleteIfExistsAsync();
+
+        await blob.UploadAsync(e.File.OpenReadStream());
+
+        _player.Photo = fileName;
+    }
+}
