@@ -1,11 +1,4 @@
-@using Microsoft.AspNetCore.Components.WebAssembly.Services
-@inject LazyAssemblyLoader assemblyLoader
-
-
-<Router AppAssembly="@typeof(Program).Assembly" OnNavigateAsync="OnNavigateAsync">
-    <Navigating>
-        <p>Loading, please wait...</p>
-    </Navigating>
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
     </Found>
@@ -15,19 +8,3 @@
         </LayoutView>
     </NotFound>
 </Router>
-
-@code{
-    private async Task OnNavigateAsync(NavigationContext args)
-    {
-        if (args.Path.Contains("players"))
-        {
-            var assemblies = await assemblyLoader.LoadAssembliesAsync(
-                new List<string>() {
-                    "CoolComponentsLibrary.dll",
-                    "Azure.Core.dll",
-                    "Azure.Storage.Blobs.dll",
-                    "Azure.Storage.Common.dll"
-                });
-        }
-    }
-}
