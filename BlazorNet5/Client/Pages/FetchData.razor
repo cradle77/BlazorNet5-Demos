@@ -1,6 +1,6 @@
 ﻿@page "/fetchdata"
 @using BlazorNet5.Shared
-@inject HttpClient Http
+@inject IWeatherForecastService ForecastService
 
 <h1>Weather forecast</h1>
 
@@ -25,7 +25,7 @@ else
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.Date.ToString(culture.DateTimeFormat.ShortDatePattern)</td>
                     <td>@forecast.TemperatureC</td>
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
@@ -37,10 +37,13 @@ else
 
 @code {
     private WeatherForecast[] forecasts;
+    private CultureInfo culture;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        culture = CultureInfo.GetCultureInfo("it-IT");
+
+        forecasts = await this.ForecastService.GetWeatherForecastsAsync();
     }
 
 }

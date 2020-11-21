@@ -1,3 +1,4 @@
+using BlazorNet5.Shared;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.WebAssembly.Services;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@ namespace BlazorNet5.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddScoped<NotificationsManager>();
+            builder.Services.AddScoped<IWeatherForecastService, ClientForecastService>();
 
             var host = builder.Build();
 
