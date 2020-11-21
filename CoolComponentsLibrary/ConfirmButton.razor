@@ -22,7 +22,7 @@
     protected override async Task OnInitializedAsync()
     {
         Lazy<Task<IJSObjectReference>> loader = new(() => JsRuntime.InvokeAsync<IJSObjectReference>(
-           "import", "./_content/CoolComponents/CoolComponents.js").AsTask());
+           "import", "./_content/CoolComponentsLibrary/HandyFunctions.js").AsTask());
 
         _js = await loader.Value;
     }
