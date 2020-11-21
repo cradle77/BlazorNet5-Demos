@@ -58,6 +58,7 @@ namespace BlazorNet5.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<NotificationsHub>("/hubs/notifications");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

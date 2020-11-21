@@ -20,8 +20,14 @@ namespace BlazorNet5.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddScoped<LazyAssemblyLoader>();
+            builder.Services.AddScoped<NotificationsManager>();
 
-            await builder.Build().RunAsync();
+            var host = builder.Build();
+
+            var notificationsManager = host.Services.GetRequiredService<NotificationsManager>();
+            await notificationsManager.InitializeAsync();
+
+            await host.RunAsync();
         }
     }
 }
