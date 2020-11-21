@@ -27,6 +27,6 @@ namespace BlazorNet5.Shared
         public string Photo { get; set; }
 
         [NotMapped]
-        public bool RenewNow { get; set; }
+        public bool ExtendNow { get; set; }
     }
 }

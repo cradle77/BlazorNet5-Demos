@@ -1,0 +1,67 @@
+﻿@page "/players"
+@inject HttpClient Http
+
+<h1>AC Milan - Player roster</h1>
+<h3>(and contract expirations reminder...)</h3>
+
+@if (_players == null)
+{
+    <p><em>Loading, please wait...</em></p>
+}
+else
+{
+    <a class="btn btn-primary" href="/players/new">New...</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Expires on</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var player in _players)
+            {
+                <tr data-priority="@(_players.IndexOf(player) < 2)">
+                    <td>
+                        <PlayerPhoto Player="player" />
+                    </td>
+                    <td>@player.Number</td>
+                    <td>@player.Name</td>
+                    <td>@player.Role</td>
+                    <td>@player.ExpiryDate.ToShortDateString()</td>
+                    <td>
+                        <a class="btn btn-primary" href="/players/@(player.Id)">Edit</a>&nbsp;&nbsp;
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Player> _players;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _players = await this.Http.GetFromJsonAsync<List<Player>>("/api/players");
+
+        this.StateHasChanged();
+    }
+
+    private async Task DeletePlayerAsync(int id)
+    {
+        var response = await this.Http.DeleteAsync($"/api/players/{id}");
+        response.EnsureSuccessStatusCode();
+
+        await this.LoadDataAsync();
+    }
+}

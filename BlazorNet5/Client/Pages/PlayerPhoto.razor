@@ -1,0 +1,13 @@
+﻿@if (string.IsNullOrEmpty(this.Player.Photo))
+{
+    <p>No photo</p>
+}
+else
+{
+    <img src="https://storageaccountorder9abc.blob.core.windows.net/photos/@(this.Player.Photo)" />
+}
+
+@code {
+    [Parameter]
+    public Player Player { get; set; }
+}
