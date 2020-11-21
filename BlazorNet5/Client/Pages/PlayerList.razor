@@ -1,5 +1,7 @@
 ﻿@page "/players"
 @inject HttpClient Http
+@inject NotificationsManager Notifications
+@implements IDisposable
 
 <div class="head">
     <h1>AC Milan - Player roster</h1>
@@ -38,7 +40,7 @@ else
                     <td>
                         <a class="btn btn-primary" href="/players/@(player.Id)">Edit</a>&nbsp;&nbsp;
                         <CoolComponentsLibrary.ConfirmButton class="btn btn-danger"
-                                                      OnClick="@(async e => await this.DeletePlayerAsync(player.Id))">
+                                                             OnClick="@(async e => await this.DeletePlayerAsync(player.Id))">
                             Delete
                         </CoolComponentsLibrary.ConfirmButton>
                     </td>
@@ -53,6 +55,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        this.Notifications.PlayerUpdatedAsync += LoadDataAsync;
+
         await this.LoadDataAsync();
     }
 
@@ -69,5 +73,10 @@ else
         response.EnsureSuccessStatusCode();
 
         await this.LoadDataAsync();
+    }
+
+    public void Dispose()
+    {
+        this.Notifications.PlayerUpdatedAsync -= LoadDataAsync;
     }
 }

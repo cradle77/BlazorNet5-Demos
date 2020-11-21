@@ -1,6 +1,7 @@
 ﻿using BlazorNet5.Server.Data;
 using BlazorNet5.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,12 @@ namespace BlazorNet5.Server.Controllers
     public class PlayersController : ControllerBase
     {
         private readonly MyContext _context;
+        private readonly IHubContext<NotificationsHub> _hubContext;
 
-        public PlayersController(MyContext context)
+        public PlayersController(MyContext context, IHubContext<NotificationsHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: api/Players
@@ -89,6 +92,8 @@ namespace BlazorNet5.Server.Controllers
                 }
             }
 
+            await _hubContext.Clients.All.SendAsync("playerUpdated");
+
             return NoContent();
         }
 
@@ -114,6 +119,8 @@ namespace BlazorNet5.Server.Controllers
             _context.Players.Add(player);
             await _context.SaveChangesAsync();
 
+            await _hubContext.Clients.All.SendAsync("playerUpdated");
+
             return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
         }
 
@@ -129,6 +136,8 @@ namespace BlazorNet5.Server.Controllers
 
             _context.Players.Remove(player);
             await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.All.SendAsync("playerUpdated");
 
             return NoContent();
         }
