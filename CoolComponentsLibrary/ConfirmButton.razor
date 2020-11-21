@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JsRuntime
+
+<button @attributes="this.AdditionalAttributes" @onclick="HandleClickAsync">
+    <span>@ChildContent</span>
+</button>
+
+@code {
+    [Parameter]
+    public string ConfirmMessage { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private IJSObjectReference _js;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lazy<Task<IJSObjectReference>> loader = new(() => JsRuntime.InvokeAsync<IJSObjectReference>(
+           "import", "./_content/CoolComponents/CoolComponents.js").AsTask());
+
+        _js = await loader.Value;
+    }
+
+    public async Task HandleClickAsync(MouseEventArgs args)
+    {
+        var result = await _js.InvokeAsync<bool>("ask", this.ConfirmMessage ?? "Are you sure?");
+
+        if (result)
+        {
+            await this.OnClick.InvokeAsync(args);
+        }
+    }
+}
