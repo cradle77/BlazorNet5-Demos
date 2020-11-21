@@ -6,27 +6,21 @@
 <h1>AC Milan - Player roster</h1>
 <h3>(and contract expirations reminder...)</h3>
 
-@if (_players == null)
-{
-    <p><em>Loading, please wait...</em></p>
-}
-else
-{
-    <a class="btn btn-primary" href="/players/new">New...</a>
-    <table class="table">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Number</th>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Expires on</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var player in _players)
-            {
+<a class="btn btn-primary" href="/players/new">New...</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Expires on</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <Virtualize @ref="_virtualize" Context="player" ItemsProvider="GetPlayers" ItemSize="220">
+            <ItemContent>
                 <tr data-priority="@player.ExtendNow">
                     <td>
                         <PlayerPhoto Player="player" />
@@ -43,24 +37,32 @@ else
                         </CoolComponentsLibrary.ConfirmButton>
                     </td>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </ItemContent>
+            <Placeholder>
+                <p><em>Loading....</em></p>
+            </Placeholder>
+        </Virtualize>
+    </tbody>
+</table>
 
 @code {
-    private List<Player> _players;
+    public Virtualize<Player> _virtualize;
 
     protected override async Task OnInitializedAsync()
     {
         this.Notifications.PlayerUpdatedAsync += LoadDataAsync;
+    }
 
-        await this.LoadDataAsync();
+    private async ValueTask<ItemsProviderResult<Player>> GetPlayers(ItemsProviderRequest request)
+    {
+        var response = await this.Http.GetFromJsonAsync<PlayersResponse>($"/api/players?start={request.StartIndex}&count={request.Count}");
+
+        return new ItemsProviderResult<Player>(response.Players, response.TotalCount);
     }
 
     private async Task LoadDataAsync()
     {
-        _players = await this.Http.GetFromJsonAsync<List<Player>>("/api/players");
+        await _virtualize.RefreshDataAsync();
 
         this.StateHasChanged();
     }
