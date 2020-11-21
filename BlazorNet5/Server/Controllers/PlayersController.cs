@@ -25,14 +25,24 @@ namespace BlazorNet5.Server.Controllers
 
         // GET: api/Players
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Player>>> GetPlayer()
+        public async Task<ActionResult<PlayersResponse>> GetPlayers(int? start = null, int? count = null)
         {
-            return await _context.Players
+            IQueryable<Player> result = _context.Players
                 .ApplySophisticatedAiAlgorithm()
                 .OrderByDescending(x => x.ExtendNow)
                 .ThenBy(x => x.ExpiryDate)
-                .ThenBy(x => x.Id)
-                .ToListAsync();
+                .ThenBy(x => x.Id);
+
+            result = result.Skip(start.GetValueOrDefault())
+                .Take(count.GetValueOrDefault());
+
+            var response = new PlayersResponse()
+            {
+                TotalCount = await _context.Players.CountAsync(),
+                Players = await result.ToListAsync()
+            };
+
+            return response;
         }
 
         // GET: api/Players/5
