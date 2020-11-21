@@ -37,6 +37,10 @@ else
                     <td>@player.ExpiryDate.ToShortDateString()</td>
                     <td>
                         <a class="btn btn-primary" href="/players/@(player.Id)">Edit</a>&nbsp;&nbsp;
+                        <CoolComponentsLibrary.ConfirmButton class="btn btn-danger"
+                                                      OnClick="@(async e => await this.DeletePlayerAsync(player.Id))">
+                            Delete
+                        </CoolComponentsLibrary.ConfirmButton>
                     </td>
                 </tr>
             }
