@@ -5,7 +5,7 @@
 @using System.IO
 
 <div class="col-6">
-    <EditForm Model="_player" OnValidSubmit="SaveAsync">
+    <EditForm EditContext="this.editContext" OnValidSubmit="SaveAsync" OnInvalidSubmit="SetStyles">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -60,12 +60,21 @@
     {
         _player = new Player() { ExpiryDate = DateTime.Today.AddYears(1) };
 
+        editContext = new EditContext(_player);
+
         _isNew = !int.TryParse(this.Id, out var id);
 
         if (!_isNew)
         {
             _player = await this.Http.GetFromJsonAsync<Player>($"/api/players/{id}");
+
+            editContext = new EditContext(_player);
         }
+    }
+
+    private void SetStyles()
+    {
+        editContext.SetFieldCssClassProvider(new BootstrapFieldCssProvider());
     }
 
     private async Task SaveAsync()
@@ -82,7 +91,7 @@
         }
 
         response.EnsureSuccessStatusCode();
-
+        
         this.Navigation.NavigateTo("/players");
     }
 
