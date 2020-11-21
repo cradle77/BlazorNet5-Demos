@@ -25,7 +25,7 @@ else
         <tbody>
             @foreach (var player in _players)
             {
-                <tr data-priority="@(_players.IndexOf(player) < 2)">
+                <tr data-priority="@player.ExtendNow">
                     <td>
                         <PlayerPhoto Player="player" />
                     </td>
