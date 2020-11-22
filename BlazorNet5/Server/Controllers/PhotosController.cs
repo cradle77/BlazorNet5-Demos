@@ -13,10 +13,14 @@ namespace BlazorNet5.Server.Controllers
     public class PhotosController : ControllerBase
     {
         private string _connectionString;
+        private string _accountName;
+        private string _key;
 
         public PhotosController(IConfiguration configuration)
         {
             _connectionString = configuration.GetSection("Blob:ConnectionString").Value;
+            _accountName = configuration.GetSection("Blob:accountName").Value;
+            _key = configuration.GetSection("Blob:key").Value;
         }
 
         [HttpPost]
@@ -40,7 +44,7 @@ namespace BlazorNet5.Server.Controllers
 
             sas.SetPermissions(AccountSasPermissions.Write | AccountSasPermissions.Create | AccountSasPermissions.Delete);
 
-            StorageSharedKeyCredential credential = new StorageSharedKeyCredential("storageaccountorder9abc", "z+/Yz33/aZ3TcpgL3xRYBm/B5zUWBiMDZqt/5FVBHbbHCV6pHfYTZuSevdgtMhgP+2pg90zQPva+ZeXDegC1Pg==");
+            StorageSharedKeyCredential credential = new StorageSharedKeyCredential(_accountName, _key);
 
             var container = new BlobContainerClient(_connectionString, "photos");
 
