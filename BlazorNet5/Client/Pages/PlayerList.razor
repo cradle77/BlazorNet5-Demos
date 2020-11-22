@@ -1,6 +1,5 @@
 ﻿@page "/players"
-@inject HttpClient Http
-@inject NotificationsManager Notifications
+@inject IPlayersListPageController PageController
 @implements IDisposable
 
 <h1>AC Milan - Player roster</h1>
@@ -19,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        <Virtualize @ref="_virtualize" Context="player" ItemsProvider="GetPlayers" ItemSize="220">
+        <Virtualize @ref="this.PageController.Virtualize" Context="player" ItemsProvider="this.PageController.GetPlayers" ItemSize="220">
             <ItemContent>
                 <tr data-priority="@player.ExtendNow">
                     <td>
@@ -32,7 +31,7 @@
                     <td>
                         <a class="btn btn-primary" href="/players/@(player.Id)">Edit</a>&nbsp;&nbsp;
                         <CoolComponentsLibrary.ConfirmButton class="btn btn-danger"
-                                                             OnClick="@(async e => await this.DeletePlayerAsync(player.Id))">
+                                                             OnClick="@(async e => await this.PageController.DeletePlayerAsync(player.Id))">
                             Delete
                         </CoolComponentsLibrary.ConfirmButton>
                     </td>
@@ -46,37 +45,13 @@
 </table>
 
 @code {
-    public Virtualize<Player> _virtualize;
-
     protected override async Task OnInitializedAsync()
     {
-        this.Notifications.PlayerUpdatedAsync += LoadDataAsync;
-    }
-
-    private async ValueTask<ItemsProviderResult<Player>> GetPlayers(ItemsProviderRequest request)
-    {
-        var response = await this.Http.GetFromJsonAsync<PlayersResponse>($"/api/players?start={request.StartIndex}&count={request.Count}");
-
-        return new ItemsProviderResult<Player>(response.Players, response.TotalCount);
-    }
-
-    private async Task LoadDataAsync()
-    {
-        await _virtualize.RefreshDataAsync();
-
-        this.StateHasChanged();
-    }
-
-    private async Task DeletePlayerAsync(int id)
-    {
-        var response = await this.Http.DeleteAsync($"/api/players/{id}");
-        response.EnsureSuccessStatusCode();
-
-        await this.LoadDataAsync();
+        this.PageController.DataHasChanged += StateHasChanged;
     }
 
     public void Dispose()
     {
-        this.Notifications.PlayerUpdatedAsync -= LoadDataAsync;
+        this.PageController.DataHasChanged -= StateHasChanged;
     }
 }

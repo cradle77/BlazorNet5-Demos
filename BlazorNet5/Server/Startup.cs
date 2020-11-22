@@ -1,5 +1,7 @@
 using BlazorNet5.Server.Data;
+using BlazorNet5.Server.PageControllers;
 using BlazorNet5.Shared;
+using BlazorNet5.Shared.PageControllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,6 +28,7 @@ namespace BlazorNet5.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IWeatherForecastService, ServerWeatherService>();
+            services.AddTransient<IPlayersListPageController, ServerPlayersListPageController>();
             services.AddMemoryCache();
             services.AddControllersWithViews();
             services.AddRazorPages();
