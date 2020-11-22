@@ -1,8 +1,10 @@
 ﻿@page "/players"
 @inject HttpClient Http
 
-<h1>AC Milan - Player roster</h1>
-<h3>(and contract expirations reminder...)</h3>
+<div class="head">
+    <h1>AC Milan - Player roster</h1>
+    <h3>(and contract expirations reminder...)</h3>
+</div>
 
 @if (_players == null)
 {
