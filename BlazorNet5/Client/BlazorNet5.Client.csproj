@@ -13,6 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <BlazorWebAssemblyLazyLoad Include="CoolComponentsLibrary.dll" />
+    <BlazorWebAssemblyLazyLoad Include="Azure.Core.dll" />
+    <BlazorWebAssemblyLazyLoad Include="Azure.Storage.Blobs.dll" />
+    <BlazorWebAssemblyLazyLoad Include="Azure.Storage.Common.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\CoolComponentsLibrary\CoolComponentsLibrary.csproj" />
     <ProjectReference Include="..\Shared\BlazorNet5.Shared.csproj" />
   </ItemGroup>
